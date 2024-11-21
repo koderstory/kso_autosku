@@ -1,1 +1,1 @@
-# koderstory_product_sku
+# Odoo Generated Product SKU
