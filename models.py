@@ -63,10 +63,9 @@ class CustomProductProduct(models.Model):
                 if template.default_code:
                     attribute_values = product.product_template_attribute_value_ids
 
-                    # Create abbreviation with two words, removing non-alphabetic characters
-                    abbr = "".join(
-                        "".join(filter(str.isalpha, av.attribute_id.name[:2].upper())) +
-                        "".join(filter(str.isalpha, av.name[:2].upper()))
+                    # Create abbreviation with only attribute value, 2 characters per word, separated by '-'
+                    abbr = "-".join(
+                        f"{''.join(filter(str.isalpha, ''.join(word[:2].upper() for word in av.name.split())))}"
                         for av in attribute_values
                     )
 
@@ -77,9 +76,8 @@ class CustomProductProduct(models.Model):
                         generated_code = f"{template.default_code}-{abbr}{suffix}"
                         suffix += 1
 
-                    product.default_code = generated_code
+                    product.default_code = generated_code.upper()
         return products
-
 
 
 
