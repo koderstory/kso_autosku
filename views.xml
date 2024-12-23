@@ -56,6 +56,10 @@
                     </group>
                 </xpath>
 
+
+                <field name="default_code" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </field>
                 <!-- <xpath expr="//page[@name='general_information']" position="after">
                     <group string="Container Specs">
                         <group>

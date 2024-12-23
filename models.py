@@ -1,4 +1,4 @@
-from odoo import models,fields,api
+from odoo import models,fields,api,exceptions
 
 
 class CustomProductTemplate(models.Model):
@@ -11,20 +11,56 @@ class CustomProductTemplate(models.Model):
     dimension = fields.Char()
     cbm = fields.Char()
 
+    # default_code = fields.Char(readonly=True)
+
+    # @api.model_create_multi
+    # def create(self, vals_list):
+    #     templates = super(CustomProductTemplate, self).create(vals_list)
+    #     for template in templates:
+    #         if not template.default_code:
+    #             category_code = template.categ_id.code if template.categ_id and template.categ_id.code else ''
+    #             if category_code:
+    #                 last_product = self.search([('default_code', 'like', f"{category_code}-%")], order="default_code desc", limit=1)
+    #                 if last_product and last_product.default_code:
+    #                     last_number = int(last_product.default_code.split('-')[-1])
+    #                 else:
+    #                     last_number = 0
+    #                 template.default_code = f"{category_code}-{last_number + 1}"
+    #     return templates
+
+    default_code = fields.Char(readonly=False)  # Allow editing, not required at field level
+
     @api.model_create_multi
     def create(self, vals_list):
-        templates = super(CustomProductTemplate, self).create(vals_list)
-        for template in templates:
-            if not template.default_code:
-                category_code = template.categ_id.code if template.categ_id and template.categ_id.code else ''
-                if category_code:
-                    last_product = self.search([('default_code', 'like', f"{category_code}-%")], order="default_code desc", limit=1)
-                    if last_product and last_product.default_code:
-                        last_number = int(last_product.default_code.split('-')[-1])
-                    else:
-                        last_number = 0
-                    template.default_code = f"{category_code}-{last_number + 1}"
-        return templates
+        for vals in vals_list:
+            if not vals.get('default_code'):
+                vals['default_code'] = self._generate_default_code(vals)
+        return super(CustomProductTemplate, self).create(vals_list)
+
+    def write(self, vals):
+        if 'default_code' in vals and not vals['default_code']:
+            raise exceptions.ValidationError("Default Code cannot be empty during updates.")
+        return super(CustomProductTemplate, self).write(vals)
+
+    @api.constrains('default_code')
+    def _check_default_code(self):
+        for record in self:
+            if not record.default_code:
+                raise exceptions.ValidationError("Default Code is required.")
+
+    def _generate_default_code(self, vals):
+        """Generate a default_code based on category or other logic."""
+        category_code = self.env['product.category'].browse(vals.get('categ_id')).code if vals.get('categ_id') else ''
+        if category_code:
+            last_product = self.search([('default_code', 'like', f"{category_code}-%")], order="default_code desc", limit=1)
+            if last_product and last_product.default_code:
+                last_number = int(last_product.default_code.split('-')[-1])
+            else:
+                last_number = 0
+            return f"{category_code}-{last_number + 1}"
+        else:
+            raise exceptions.ValidationError("This product has category that doesn't has code. Category code is required to auto-generate a default code.")
+
 
 
 class CustomProductProduct(models.Model):
@@ -36,6 +72,8 @@ class CustomProductProduct(models.Model):
 
     dimension = fields.Char()
     cbm = fields.Char()
+
+    default_code = fields.Char(readonly=True)
 
     @api.model_create_multi
     def create(self, vals_list):
