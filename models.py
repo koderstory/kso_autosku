@@ -41,6 +41,7 @@ class CustomProductTemplate(models.Model):
                 template.default_code = f"{category_code}-{last_number + 1}"
         return templates
 
+from itertools import product as itertools_product
 
 class CustomProductProduct(models.Model):
     _inherit = 'product.product'
@@ -57,9 +58,9 @@ class CustomProductProduct(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         products = super(CustomProductProduct, self).create(vals_list)
-        for product in products:
-            if not product.default_code:
-                template = product.product_tmpl_id
+        for variant in products:
+            if not variant.default_code:
+                template = variant.product_tmpl_id
 
                 # Generate template default_code if it doesn't exist
                 if not template.default_code:
@@ -69,14 +70,14 @@ class CustomProductProduct(models.Model):
                         )
 
                     category_code = template.categ_id.code
-                    existing_products = template.search(
+                    existing_templates = self.env['product.template'].search(
                         [('default_code', 'like', f"{category_code}-%")]
                     )
 
                     # Determine the highest numbering
                     last_number = 0
-                    for existing_product in existing_products:
-                        parts = existing_product.default_code.split('-')
+                    for existing_template in existing_templates:
+                        parts = existing_template.default_code.split('-')
                         if len(parts) > 1 and parts[1].isdigit():
                             number = int(parts[1])
                             last_number = max(last_number, number)
@@ -84,18 +85,37 @@ class CustomProductProduct(models.Model):
                     # Generate template default_code
                     template.default_code = f"{category_code}-{last_number + 1}"
 
-                # Generate variant code if attributes exist
-                attribute_values = product.product_template_attribute_value_ids
-                variant_code = ''
+                # Generate variant codes based on attribute values
+                attribute_values = variant.product_template_attribute_value_ids
                 if attribute_values:
-                    first_attribute = attribute_values[0]
-                    variant_code = ''.join(word[:2].upper() for word in first_attribute.name.split())
+                    # Group attribute values by attribute
+                    attribute_groups = {}
+                    for av in attribute_values:
+                        attribute_groups.setdefault(av.attribute_id.id, []).append(av.name)
 
-                # Combine template.default_code with variant_code
-                if variant_code:
-                    product.default_code = f"{template.default_code}-{variant_code}"
+                    # Generate all combinations of attribute values
+                    attribute_combinations = list(itertools_product(
+                        *[attribute_groups[attr_id] for attr_id in attribute_groups]
+                    ))
+
+                    # Generate variant codes for each combination
+                    for combination in attribute_combinations:
+                        short_codes = [''.join(word[:2].upper() for word in value.split()) for value in combination]
+                        variant_code = '-'.join(short_codes)
+
+                        # Combine with template.default_code
+                        base_default_code = f"{template.default_code}-{variant_code}"
+
+                        # Ensure uniqueness
+                        unique_code = base_default_code
+                        suffix = 1
+                        while self.search([('default_code', '=', unique_code)], limit=1):
+                            unique_code = f"{base_default_code}-{suffix}"
+                            suffix += 1
+
+                        variant.default_code = unique_code
                 else:
                     # No attributes: use the template default_code
-                    product.default_code = template.default_code
+                    variant.default_code = template.default_code
 
         return products
