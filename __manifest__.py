@@ -2,7 +2,7 @@
     'name': 'KSO: Manufacture Product',
     'version': '1.0',
     'summary': 'Add fields for manufacturing product',
-    'depends': ['base', 'product', 'kso_categorycode'],
+    'depends': ['base', 'product', 'kso_categorycode', 'website_sale'],
     'data': [
         'views.xml',
     ],
