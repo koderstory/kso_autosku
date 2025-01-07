@@ -17,20 +17,25 @@ class CustomProductTemplate(models.Model):
         templates = super(CustomProductTemplate, self).create(vals_list)
         for template in templates:
             if not template.default_code:
-                # Check if the category has a code
+                # Validate the presence of a category and category code
                 if not template.categ_id or not template.categ_id.code:
                     raise exceptions.ValidationError(
                         "The product category must have a 'code' to generate a default code."
                     )
-
+                
                 category_code = template.categ_id.code
 
-                # Find all existing products with matching category code
+                # Check if the category has a parent and concatenate parent code
+                parent_category = template.categ_id.parent_id
+                if parent_category and parent_category.code:
+                    category_code = f"{parent_category.code}{category_code}"
+
+                # Find existing products with matching category code pattern
                 existing_products = self.search(
                     [('default_code', 'like', f"{category_code}-%")]
                 )
 
-                # Determine the highest numbering
+                # Determine the highest number from existing product codes
                 last_number = 0
                 for product in existing_products:
                     parts = product.default_code.split('-')
@@ -38,8 +43,9 @@ class CustomProductTemplate(models.Model):
                         number = int(parts[1])
                         last_number = max(last_number, number)
 
-                # Start numbering from 1 if no valid existing product
+                # Assign the new default code
                 template.default_code = f"{category_code}-{last_number + 1}"
+
         return templates
 
 from itertools import product as itertools_product
@@ -71,6 +77,12 @@ class CustomProductProduct(models.Model):
                         )
 
                     category_code = template.categ_id.code
+
+                    # Check if the category has a parent and concatenate parent code
+                    parent_category = template.categ_id.parent_id
+                    if parent_category and parent_category.code:
+                        category_code = f"{parent_category.code}{category_code}"
+
                     existing_templates = self.env['product.template'].search(
                         [('default_code', 'like', f"{category_code}-%")]
                     )
