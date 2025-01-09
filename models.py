@@ -19,16 +19,20 @@ class CustomProductTemplate(models.Model):
             if not template.default_code:
                 # Validate the presence of a category and category code
                 if not template.categ_id or not template.categ_id.code:
+                    continue
                     raise exceptions.ValidationError(
                         "The product category must have a 'code' to generate a default code."
                     )
+                    
+
                 
                 category_code = template.categ_id.code
 
                 # Check if the category has a parent and concatenate parent code
-                parent_category = template.categ_id.parent_id
-                if parent_category and parent_category.code:
-                    category_code = f"{parent_category.code}{category_code}"
+                # ------------------------------------------------------------------
+                # parent_category = template.categ_id.parent_id
+                # if parent_category and parent_category.code:
+                #     category_code = f"{parent_category.code}{category_code}"
 
                 # Find existing products with matching category code pattern
                 existing_products = self.search(
@@ -72,6 +76,7 @@ class CustomProductProduct(models.Model):
                 # Generate template default_code if it doesn't exist
                 if not template.default_code:
                     if not template.categ_id or not template.categ_id.code:
+                        continue
                         raise exceptions.ValidationError(
                             "The product category must have a 'code' to generate a default code."
                         )
@@ -79,9 +84,10 @@ class CustomProductProduct(models.Model):
                     category_code = template.categ_id.code
 
                     # Check if the category has a parent and concatenate parent code
-                    parent_category = template.categ_id.parent_id
-                    if parent_category and parent_category.code:
-                        category_code = f"{parent_category.code}{category_code}"
+                    # ------------------------------------------------------------------
+                    # parent_category = template.categ_id.parent_id
+                    # if parent_category and parent_category.code:
+                    #     category_code = f"{parent_category.code}{category_code}"
 
                     existing_templates = self.env['product.template'].search(
                         [('default_code', 'like', f"{category_code}-%")]
