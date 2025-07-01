@@ -6,13 +6,6 @@ from odoo.exceptions import ValidationError
 class CustomProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    width = fields.Char()
-    depth = fields.Char()
-    height = fields.Char()
-
-    dimension = fields.Char()
-    cbm = fields.Char()
-
     @api.model_create_multi
     def create(self, vals_list):
         templates = super(CustomProductTemplate, self).create(vals_list)
@@ -46,18 +39,11 @@ class CustomProductTemplate(models.Model):
                     last_number = max(last_number, number)
 
             # Assign the new default code
-            template.default_code = f"{category_code}-{last_number + 1}"
+            template.default_code = f"{category_code}-{last_number + 1:05d}"
 
 
 class CustomProductProduct(models.Model):
     _inherit = 'product.product'
-
-    width = fields.Char()
-    depth = fields.Char()
-    height = fields.Char()
-
-    dimension = fields.Char()
-    cbm = fields.Char()
 
     default_code = fields.Char(readonly=True)
 

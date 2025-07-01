@@ -12,7 +12,7 @@
                 <!-- Locate dimension  -->
                 <xpath expr="//page[@name='general_information']" position="inside">
                     <group string="Dimensions">
-                        <group>
+                        <!-- <group>
                             <field name="width" placeholder="or Length if size using LxWxH" />
                             <field name="depth" placeholder="or Width if size using LxWxH" />
                             <field name="height" placeholder="" />
@@ -20,7 +20,7 @@
                         <group>
                             <field name="dimension" placeholder="E.g w260 x d85 x h75 x bh70" />
                             <field name="cbm" placeholder="" />
-                        </group>
+                        </group> -->
                     </group>
                 </xpath>
 
@@ -44,7 +44,7 @@
                 <!-- Locate dimension  -->
                 <xpath expr="//page[@name='general_information']" position="inside">
                     <group string="Dimensions">
-                        <group>
+                        <!-- <group>
                             <field name="width" placeholder="or Length if size using LxWxH" />
                             <field name="depth" placeholder="or Width if size using LxWxH" />
                             <field name="height" placeholder="" />
@@ -52,7 +52,7 @@
                         <group>
                             <field name="dimension" placeholder="E.g w260 x d85 x h75 x bh70" />
                             <field name="cbm" placeholder="" />
-                        </group>
+                        </group> -->
                     </group>
                 </xpath>
 

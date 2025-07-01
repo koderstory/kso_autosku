@@ -1,1 +1,0 @@
-# Odoo Generated Product SKU

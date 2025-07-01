@@ -1,2 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_koderstory_dynamic_code_koderstory_dynamic_code,koderstory_dynamic_code.koderstory_dynamic_code,model_koderstory_dynamic_code_koderstory_dynamic_code,base.group_user,1,1,1,1

@@ -1,11 +1,19 @@
 {
-    'name': 'KSO: Manufacture Product',
-    'version': '1.0',
-    'summary': 'Add fields for manufacturing product',
-    'depends': ['base', 'product', 'kso_categorycode', ],
+    "name": " KSO: auto generate SKU",
+
+    'version': "18.0",
+
+    'category': "Products",
+
+    "summary": "-",
+    'author': "koderstory",
+    'website': 'https://koderstory.com/',
+    "depends": ["product"],
     'data': [
-        'views.xml',
+        'views/product_view.xml',
     ],
+    'license': "OPL-1",
     'installable': True,
-    'application': False,
+    'application': True,
+    'auto_install': False,
 }
